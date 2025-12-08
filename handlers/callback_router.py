@@ -11,13 +11,14 @@ from ai_gpt.enums import GPTRole
 # from database import requests
 # from database.tables import User
 from fsm import Generate, Reminder, TopGame
-from keyboards import ikb_top_game_answers, ikb_back_button, ikb_main_menu
+from keyboards import ikb_top_game_answers, ikb_back_button, ikb_main_menu, ikb_opinions_menu
 # from keyboards.callback_data import CallbackBackButton, CallbackMainMenu, CallbackApprove
 # from scheduler.scheduler import schedule_event
 from utils import FileManager
 from utils.enums import Path
-from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackButton
+from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackButton, CallbackQuestion
 from middleware import AdminMiddleware
+from database import requests
 
 callback_router = Router()
 callback_router.callback_query.middleware(AdminMiddleware())
@@ -67,17 +68,47 @@ async def top_game_answer(callback: CallbackQuery, callback_data: CallbackTopGam
         text=message_data['question'],
         reply_markup=ikb_top_game_answers(message_data),
     )
-#
-#
-# async def callback_main_menu(callback: CallbackQuery, user: User, state: FSMContext, bot: Bot):
-#     await state.clear()
-#     msg_text = await FileManager.read(Path.START_COMMAND.value, user_name=user.name)
-#     await bot.edit_message_text(
-#         chat_id=callback.from_user.id,
-#         message_id=callback.message.message_id,
-#         text=msg_text,
-#         reply_markup=ikb_main_menu(),
-#     )
+
+
+@callback_router.callback_query(CallbackMenu.filter(F.button == 'opinions'))
+async def start_opinions(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    questions = await requests.all_questions()
+    await bot.edit_message_text(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        text='Вопросы',
+        reply_markup=ikb_opinions_menu(questions),
+    )
+
+
+@callback_router.callback_query(CallbackQuestion.filter())
+async def opinion_answer(callback: CallbackQuery, callback_data: CallbackQuestion, state: FSMContext, bot: Bot):
+    # questions = await requests.all_questions()
+    # await bot.edit_message_text(
+    #     chat_id=callback.from_user.id,
+    #     message_id=callback.message.message_id,
+    #     text='Вопросы',
+    #     reply_markup=ikb_opinions_menu(questions),
+    # )
+    await callback.answer(
+        text=str(callback_data.id),
+    )
+    # msg_text = await FileManager.read(Path.START_COMMAND.value, user_name=user.name)
+    # await bot.edit_message_text(
+    #     chat_id=callback.from_user.id,
+    #     message_id=callback.message.message_id,
+    #     text=msg_text,
+    #     reply_markup=ikb_main_menu(),
+    # )
+
+
+@callback_router.callback_query(CallbackMenu.filter(F.button == 'delete_all'))
+async def delete_all_questions(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    await requests.delete_questions()
+    await callback.answer(
+        text='Все вопросы удалены!',
+        show_alert=True,
+    )
 #
 #
 # @callback_router.callback_query(CallbackMainMenu.filter(F.button == 'apply'))

@@ -6,6 +6,11 @@ class CallbackTopGame(CallbackData, prefix='CTG'):
     id: int = 0
 
 
+class CallbackQuestion(CallbackData, prefix='CQ'):
+    button: str
+    id: int
+
+
 class CallbackMenu(CallbackData, prefix='CM'):
     button: str
 

@@ -7,10 +7,11 @@ from aiogram.enums import ParseMode
 import config
 import misc
 from handlers import bot_main_router
-
+from database import create_tables
 
 
 async def start_bot():
+    await create_tables()
     bot = Bot(
         token=config.BOT_TOKEN,
         default=DefaultBotProperties(

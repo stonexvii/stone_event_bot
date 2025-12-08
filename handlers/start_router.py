@@ -4,6 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from database import requests
 # from database.tables import User
 from keyboards import ikb_main_menu
 from utils import FileManager
@@ -25,6 +26,8 @@ async def main_menu(message: Message, bot: Bot, state: FSMContext):
 @start_router.message(Command('start'))
 async def admin_main_menu(message: Message, admin: bool, bot: Bot, state: FSMContext):
     if admin:
+        user = await requests.get_user(message.from_user.id, message.from_user.username)
+        # await requests.new_question('Вопрос', ['1', '2', '3', '4'])
         await main_menu(message, bot, state)
     else:
         await message.answer(

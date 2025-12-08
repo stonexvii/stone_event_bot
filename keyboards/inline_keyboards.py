@@ -1,7 +1,8 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from .buttons import KeyboardButton
-from .callback_data import CallbackBackButton, CallbackTopGame, CallbackMenu
+from .callback_data import CallbackBackButton, CallbackTopGame, CallbackMenu, CallbackQuestion
+from database.tables import Question
 
 
 def ikb_main_menu():
@@ -12,6 +13,22 @@ def ikb_main_menu():
     ]
     for button in buttons:
         keyboard.button(**button.as_kwargs())
+    return keyboard.as_markup()
+
+
+def ikb_opinions_menu(question_list: list[Question]):
+    keyboard = InlineKeyboardBuilder()
+    for question in question_list:
+        keyboard.button(
+            **KeyboardButton(question.question, CallbackQuestion, button='question', id=question.id).as_kwargs(),
+        )
+    keyboard.button(
+        **KeyboardButton('Удалить всё!', CallbackMenu, button='delete_all').as_kwargs(),
+    )
+    keyboard.button(
+        **KeyboardButton('Назад', CallbackBackButton, button='back').as_kwargs(),
+    )
+    keyboard.adjust(*[1] * len(question_list), 2)
     return keyboard.as_markup()
 
 
@@ -28,6 +45,8 @@ def ikb_top_game_answers(dict_message: dict):
     )
     keyboard.adjust(1)
     return keyboard.as_markup()
+
+
 # def ikb_welcome(text: str, button: str):
 #     keyboard = InlineKeyboardBuilder()
 #     keyboard.button(**KeyboardButton(text, CallbackMainMenu, button=button).as_kwargs())
