@@ -6,6 +6,10 @@ class TopGame(StatesGroup):
     show_answers = State()
 
 
+class Events(StatesGroup):
+    new_event = State()
+
+
 class UserName(StatesGroup):
     wait_for_answer = State()
 

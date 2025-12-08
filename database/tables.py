@@ -9,12 +9,32 @@ class Base(AsyncAttrs, DeclarativeBase):
     pass
 
 
+class Event(Base):
+    __tablename__ = 'events'
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    description: Mapped[str] = mapped_column(String(100), nullable=True)
+    date: Mapped[date] = mapped_column(Date)
+
+    users = relationship('User', back_populates='event', cascade='all, delete-orphan', passive_deletes=True)
+
+
 class User(Base):
     __tablename__ = 'users'
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    name: Mapped[str] = mapped_column(String(900), nullable=True)
     username: Mapped[str] = mapped_column(String(100), nullable=True)
-    register_date: Mapped[date] = mapped_column(Date)
-    is_guest: Mapped[bool] = mapped_column(Boolean, default=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey('events.id', ondelete="CASCADE"), nullable=False)
+    is_sending: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    event = relationship('Event', back_populates='users')
+
+
+class Guest(Base):
+    __tablename__ = 'guests'
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+
+    answers = relationship('GuestAnswer', back_populates='guest', cascade='all, delete-orphan', passive_deletes=True)
 
 
 class Question(Base):
@@ -22,10 +42,10 @@ class Question(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     question: Mapped[str] = mapped_column(String(900))
-    answers = relationship('Answer', back_populates='question', cascade='all, delete-orphan',
-                           passive_deletes=True)
-    user_answer = relationship('UserAnswer', back_populates='question', cascade='all, delete-orphan',
-                               passive_deletes=True)
+
+    answers = relationship('Answer', back_populates='question', cascade='all, delete-orphan', passive_deletes=True)
+    guest_answer = relationship('GuestAnswer', back_populates='question', cascade='all, delete-orphan',
+                                passive_deletes=True)
 
 
 class Answer(Base):
@@ -37,11 +57,18 @@ class Answer(Base):
     answer: Mapped[str] = mapped_column(String(100))
     question = relationship('Question', back_populates='answers')
 
+    guests_answers = relationship('GuestAnswer', back_populates='answer', cascade='all, delete-orphan',
+                                  passive_deletes=True)
 
-class UserAnswer(Base):
-    __tablename__ = 'users_answers'
+
+class GuestAnswer(Base):
+    __tablename__ = 'guests_answers'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+
+    guest_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('guests.id', ondelete="CASCADE"), nullable=False)
     question_id: Mapped[str] = mapped_column(Integer, ForeignKey('questions.id', ondelete="CASCADE"), nullable=False)
-    answer_id: Mapped[int] = mapped_column(Integer)
-    question = relationship('Question', back_populates='user_answer')
+    answer_id: Mapped[int] = mapped_column(Integer, ForeignKey('answers.id', ondelete="CASCADE"), nullable=False)
+
+    guest = relationship('Guest', back_populates='answers')
+    question = relationship('Question', back_populates='guest_answer')
+    answer = relationship('Answer', back_populates='guests_answers')

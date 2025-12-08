@@ -56,3 +56,15 @@ def response_to_dict(message_text: str):
                 'visible': False,
             }
     return data
+
+
+def db_to_dict(questions_list):
+    questions = {}
+    for question in questions_list:
+        questions[str(question.id)] = {
+            'question': question.question,
+            'answers': {},
+        }
+        for answer in question.answers:
+            questions[str(question.id)]['answers'][str(answer.answer_id)] = answer.answer
+    return questions

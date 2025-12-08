@@ -1,6 +1,6 @@
 from aiogram import Router, Bot
 from aiogram.enums import ChatAction
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -24,12 +24,12 @@ async def main_menu(message: Message, bot: Bot, state: FSMContext):
 
 
 @start_router.message(Command('start'))
-async def admin_main_menu(message: Message, admin: bool, bot: Bot, state: FSMContext):
+async def command_start(message: Message, command: CommandObject, admin: bool, bot: Bot, state: FSMContext):
     if admin:
-        user = await requests.get_user(message.from_user.id, message.from_user.username)
-        # await requests.new_question('Вопрос', ['1', '2', '3', '4'])
         await main_menu(message, bot, state)
     else:
+        event_id = int(command.args)
+        await requests.new_user(message.from_user.id, message.from_user.username, event_id)
         await message.answer(
             text='Ты пользователь',
         )

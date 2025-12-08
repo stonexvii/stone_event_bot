@@ -6,6 +6,7 @@ from .callback_router import callback_router
 from .start_router import start_router
 from .user_router import user_router
 from .fsm_routers import fsm_router
+from .inline_routers import inline_router
 
 bot_main_router = Router()
 # bot_main_router.message.middleware(Membership())
@@ -16,7 +17,7 @@ bot_main_router = Router()
 bot_main_router.include_routers(
     admin_router,
     start_router,
-    callback_router,
+    inline_router,
     fsm_router,
     user_router,
 )

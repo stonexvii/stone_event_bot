@@ -17,3 +17,8 @@ DB_ADDRESS = os.getenv('DB_ADDRESS')
 DB_PORT = int(os.getenv('DB_PORT'))
 
 DB_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_ADDRESS}:{DB_PORT}/{DB_NAME}'
+
+PUSHER_APP_ID = os.getenv('PUSHER_APP_ID')
+PUSHER_KEY = os.getenv('PUSHER_KEY')
+PUSHER_SECRET = os.getenv('PUSHER_SECRET')
+PUSHER_CLUSTER = os.getenv('PUSHER_CLUSTER')
