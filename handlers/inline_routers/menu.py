@@ -3,7 +3,7 @@ from datetime import datetime
 from asyncio import sleep
 from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, BufferedInputFile
 
 from ai_gpt import GPTMessage
 from ai_gpt.enums import GPTRole
@@ -18,10 +18,11 @@ from utils import FileManager
 from utils.enums import Path
 from utils.bot import db_to_dict
 from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackButton, CallbackQuestion, \
-    CallbackPushAnswer
+    CallbackPushAnswer, CallbackEvent
 from middleware import AdminMiddleware
 from database import requests
-from async_pusher import async_pusher
+from async_apps import qr_code_app, async_pusher
+from fsm import Events
 
 menu_router = Router()
 menu_router.callback_query.middleware(AdminMiddleware())
@@ -58,3 +59,61 @@ async def admin_events_menu(update: Message | CallbackQuery, bot: Bot, state: FS
 async def admin_events(callback: CallbackQuery, bot: Bot, state: FSMContext):
     await state.clear()
     await admin_events_menu(callback, bot, state)
+
+
+@menu_router.callback_query(CallbackEvent.filter(F.button == 'select'))
+async def select_event(callback: CallbackQuery, callback_data: CallbackEvent, bot: Bot):
+    event = await requests.get_event(callback_data.event_id)
+    message_text = f'{event.date}\nЗаголовок: {event.title}\n\n{event.description}'
+    await bot.edit_message_text(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        text=message_text,
+        reply_markup=ikb_event_menu(event),
+    )
+
+
+@menu_router.callback_query(CallbackEvent.filter(F.button == 'activate'))
+async def activate_event(callback: CallbackQuery, callback_data: CallbackEvent, bot: Bot):
+    await requests.activate_event(callback_data.event_id)
+    event = await requests.get_event(callback_data.event_id)
+    await callback.answer(
+        text=f'Активное событие:\n{event.title}',
+        show_alert=True,
+    )
+    img_bytes = await qr_code_app.get_qr(event.id)
+    async_pusher.message.set_title(event.title)
+    photo = BufferedInputFile(img_bytes, filename="qr.png")
+
+    await bot.send_photo(
+        chat_id=callback.from_user.id,
+        photo=photo,
+        caption=f"Вот твой QR 👇",
+    )
+
+
+@menu_router.callback_query(CallbackEvent.filter(F.button == 'title'))
+async def set_event_title(callback: CallbackQuery, callback_data: CallbackEvent, bot: Bot, state: FSMContext):
+    await state.set_state(Events.set_title)
+    await state.update_data(
+        {
+            'event_id': callback_data.event_id,
+            'message_id': callback.message.message_id,
+        },
+    )
+    await bot.edit_message_text(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        text='Введите заголовок для мероприятия:',
+        # reply_markup=ikb_event_menu(event),
+    )
+
+
+@menu_router.callback_query(CallbackEvent.filter(F.button == 'done'))
+async def done_event(callback: CallbackQuery, callback_data: CallbackEvent, bot: Bot):
+    event = await requests.get_event(callback_data.event_id)
+    await requests.done_event(event.id)
+    await callback.answer(
+        text=f'Событие завершено:\n{event.title}',
+        show_alert=True,
+    )

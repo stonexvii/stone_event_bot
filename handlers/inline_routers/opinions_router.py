@@ -21,12 +21,24 @@ from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackB
     CallbackPushAnswer
 from middleware import AdminMiddleware
 from database import requests
-from async_pusher import async_pusher
+from async_apps import async_pusher
 from .menu import main_menu, admin_events_menu
 
 opinions_router = Router()
 opinions_router.callback_query.middleware(AdminMiddleware())
 
+@opinions_router.callback_query(CallbackMenu.filter(F.button == 'opinions'))
+async def start_opinions(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    questions = await requests.all_questions()
+    questions = db_to_dict(questions)
+    await async_pusher.reset()
+    await state.update_data(**questions)
+    await bot.edit_message_text(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        text='Вопросы',
+        reply_markup=ikb_opinions_menu(questions),
+    )
 
 @opinions_router.callback_query(CallbackBackButton.filter())
 async def back_to_main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext):
@@ -55,18 +67,7 @@ async def delete_all_questions(callback: CallbackQuery, bot: Bot, state: FSMCont
     )
 
 
-@opinions_router.callback_query(CallbackMenu.filter(F.button == 'opinions'))
-async def start_opinions(callback: CallbackQuery, state: FSMContext, bot: Bot):
-    questions = await requests.all_questions()
-    questions = db_to_dict(questions)
-    await async_pusher.reset()
-    await state.update_data(**questions)
-    await bot.edit_message_text(
-        chat_id=callback.from_user.id,
-        message_id=callback.message.message_id,
-        text='Вопросы',
-        reply_markup=ikb_opinions_menu(questions),
-    )
+
 
 
 @opinions_router.callback_query(CallbackQuestion.filter(F.button == 'question'))

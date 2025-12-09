@@ -1,15 +1,21 @@
 from aiogram import Router, Bot, F
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message
+from aiogram.types import Message,BufferedInputFile
 
 from middleware import AdminMiddleware
 from utils import FileManager
 from utils.enums import Path
 from utils.filemanager import question_from_text
 from database import requests
+import asyncio
+import aiohttp
+from io import BytesIO
+from aiogram import Bot, Dispatcher, types
+from async_apps import qr_code_app
 
 admin_router = Router()
 admin_router.message.middleware(AdminMiddleware())
+
 
 
 @admin_router.message(F.document)

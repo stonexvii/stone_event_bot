@@ -21,7 +21,7 @@ from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackB
     CallbackPushAnswer
 from middleware import AdminMiddleware
 from database import requests
-from async_pusher import async_pusher
+from async_apps import async_pusher
 
 top_game_router = Router()
 top_game_router.callback_query.middleware(AdminMiddleware())

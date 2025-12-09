@@ -27,5 +27,10 @@ class CallbackMenu(CallbackData, prefix='CM'):
     button: str
 
 
+class CallbackEvent(CallbackData, prefix='CE'):
+    button: str
+    event_id: int
+
+
 class CallbackBackButton(CallbackData, prefix='CB'):
     button: str

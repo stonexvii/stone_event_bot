@@ -2,7 +2,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from .buttons import KeyboardButton
 from .callback_data import CallbackBackButton, CallbackTopGame, CallbackMenu, CallbackQuestion, CallbackGuestAnswer, \
-    CallbackPushAnswer
+    CallbackPushAnswer, CallbackEvent
 from database.tables import Event
 
 
@@ -21,20 +21,22 @@ def ikb_main_menu():
 
 def ikb_events_menu(events_list: list[Event]):
     keyboard = InlineKeyboardBuilder()
+    buttons = [
+        KeyboardButton('Создать', CallbackMenu, button='new_event'),
+        KeyboardButton('Назад', CallbackBackButton, button='back')
+    ]
     for event in events_list:
         keyboard.button(
             **KeyboardButton(
-                f'{event.date} {event.title}',
-                CallbackMenu,
-                button='activate_event',
+                f'{event.date} {event.title}' + ('✔️' if event.active else ''),
+                CallbackEvent,
+                button='select',
+                event_id=event.id,
             ).as_kwargs(),
         )
-    keyboard.button(
-        **KeyboardButton('Создать', CallbackMenu, button='new_event').as_kwargs(),
-    )
-    keyboard.button(
-        **KeyboardButton('Назад', CallbackBackButton, button='back').as_kwargs(),
-    )
+    for button in buttons:
+        keyboard.button(**button.as_kwargs())
+    keyboard.adjust(*[1] * (len(events_list)), 2)
     return keyboard.as_markup()
 
 
@@ -43,6 +45,20 @@ def ikb_cancel_new_event():
     keyboard.button(
         **KeyboardButton('Отмена', CallbackMenu, button='events').as_kwargs(),
     )
+    return keyboard.as_markup()
+
+
+def ikb_event_menu(event: Event):
+    keyboard = InlineKeyboardBuilder()
+    buttons = [
+        KeyboardButton('Активировать', CallbackEvent, button='activate', event_id=event.id),
+        KeyboardButton('Заголовок', CallbackEvent, button='title', event_id=event.id),
+        KeyboardButton('Закончить', CallbackEvent, button='done', event_id=event.id),
+        KeyboardButton('Назад', CallbackMenu, button='events'),
+    ]
+    for button in buttons:
+        keyboard.button(**button.as_kwargs())
+    keyboard.adjust(1)
     return keyboard.as_markup()
 
 

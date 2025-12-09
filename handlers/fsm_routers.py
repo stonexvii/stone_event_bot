@@ -73,3 +73,14 @@ async def catch_voice_message(message: Message, bot: Bot, state: FSMContext):
         #         'messages': msg_list.json(),
         #     }
         # )
+
+
+@fsm_router.message(Events.set_title)
+async def catch_event_title(message: Message, bot: Bot, state: FSMContext):
+    event_id = await state.get_value('event_id')
+    await requests.title_event(event_id, message.text)
+    await bot.delete_message(
+        chat_id=message.from_user.id,
+        message_id=message.message_id,
+    )
+    await admin_events_menu(message, bot, state)

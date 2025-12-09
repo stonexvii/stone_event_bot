@@ -8,6 +8,7 @@ class TopGame(StatesGroup):
 
 class Events(StatesGroup):
     new_event = State()
+    set_title = State()
 
 
 class UserName(StatesGroup):
