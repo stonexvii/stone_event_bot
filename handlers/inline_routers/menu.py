@@ -21,7 +21,10 @@ from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackB
     CallbackPushAnswer
 from middleware import AdminMiddleware
 from database import requests
-from pusher_app import async_pusher
+from async_pusher import async_pusher
+
+menu_router = Router()
+menu_router.callback_query.middleware(AdminMiddleware())
 
 
 async def main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext):
@@ -47,5 +50,11 @@ async def admin_events_menu(update: Message | CallbackQuery, bot: Bot, state: FS
         chat_id=update.from_user.id,
         message_id=message_id,
         text=msg_text,
-        reply_markup=ikb_events_menu(),
+        reply_markup=ikb_events_menu(events),
     )
+
+
+@menu_router.callback_query(CallbackMenu.filter(F.button == 'events'))
+async def admin_events(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    await state.clear()
+    await admin_events_menu(callback, bot, state)

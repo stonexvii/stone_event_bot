@@ -14,6 +14,7 @@ class Event(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     description: Mapped[str] = mapped_column(String(100), nullable=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False, default='TITLE')
     date: Mapped[date] = mapped_column(Date)
 
     users = relationship('User', back_populates='event', cascade='all, delete-orphan', passive_deletes=True)

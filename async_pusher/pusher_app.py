@@ -1,21 +1,3 @@
-# import pusher
-#
-# import config
-#
-# pusher_client = pusher.Pusher(
-#     app_id=config.PUSHER_APP_ID,
-#     key=config.PUSHER_KEY,
-#     secret=config.PUSHER_SECRET,
-#     cluster=config.PUSHER_CLUSTER,
-#     ssl=True,
-#     timeout=15,
-# )
-#
-#
-# def push_message(message: dict[str, str]):
-#     pusher_client.trigger('my-channel', 'my-event', message)
-
-
 import hmac
 import hashlib
 import time
@@ -24,6 +6,7 @@ from urllib.parse import urlencode
 
 import aiohttp
 import config
+from .opinions_message import PusherMessage
 
 
 class AsyncPusher:
@@ -41,52 +24,53 @@ class AsyncPusher:
         self.cluster = config.PUSHER_CLUSTER
         self.scheme = "https" if ssl else "http"
         self.base = f"{self.scheme}://api-{self.cluster}.pusher.com"
-        self.message = {
-            'question': 'HEADER',
-            'answer_1': '',
-            'answer_2': '',
-            'answer_3': '',
-            'answer_4': '',
-        }
+        self.message = PusherMessage()
 
-    async def trigger(self):
-        method = "POST"
-        path = f"/apps/{self.app_id}/events"
+    async def set_question(self, question: str):
+        self.message.set_question(question)
+        await self.push()
 
+    async def set_answer(self, answer_id: int, answer: str):
+        self.message.set_answer(answer_id, answer)
+        await self.push()
+
+    async def reset(self):
+        self.message.reset()
+        await self.push()
+
+    #
+    # def reset_message(self):
+    #     self.message['question'] = 'HEADER'
+    #     for number in range(1, 5):
+    #         self.message[f'answer_{number}'] = ''
+
+    async def push(self, name: str = 'my-event', channel: str = 'my-channel'):
+        method, path = "POST", f"/apps/{self.app_id}/events"
         body = json.dumps({
-            "name": 'my-event',
-            "channels": ['my-channel'],
-            "data": json.dumps(self.message, ensure_ascii=False)
+            "name": name,
+            "channels": [channel],
+            "data": json.dumps(self.message.json, ensure_ascii=False)
         })
-
-        body_md5 = hashlib.md5(body.encode("utf-8")).hexdigest()
 
         params = {
             "auth_key": self.key,
             "auth_timestamp": int(time.time()),
             "auth_version": "1.0",
-            "body_md5": body_md5,
+            "body_md5": hashlib.md5(body.encode("utf-8")).hexdigest(),
         }
 
         sorted_params = sorted(params.items(), key=lambda x: x[0])
-        query_string = urlencode(sorted_params)
-
-        string_to_sign = f"{method}\n{path}\n{query_string}"
+        string_to_sign = f"{method}\n{path}\n{urlencode(sorted_params)}"
         signature = hmac.new(
             self.secret,
             string_to_sign.encode("utf-8"),
             hashlib.sha256
         ).hexdigest()
-
         params["auth_signature"] = signature
-
-        url = f"{self.base}{path}"
-
         headers = {
             "Content-Type": "application/json"
         }
-
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, params=params, data=body, headers=headers) as resp:
+            async with session.post(f"{self.base}{path}", params=params, data=body, headers=headers) as resp:
                 text = await resp.text()
                 return resp.status, text

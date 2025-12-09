@@ -21,7 +21,7 @@ from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackB
     CallbackPushAnswer
 from middleware import AdminMiddleware
 from database import requests
-from pusher_app import async_pusher
+from async_pusher import async_pusher
 from .menu import main_menu, admin_events_menu
 
 opinions_router = Router()
@@ -32,11 +32,6 @@ opinions_router.callback_query.middleware(AdminMiddleware())
 async def back_to_main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext):
     await main_menu(callback, bot, state)
 
-
-@opinions_router.callback_query(CallbackMenu.filter(F.button == 'events'))
-async def admin_events(callback: CallbackQuery, bot: Bot, state: FSMContext):
-    await state.clear()
-    await admin_events_menu(callback, bot, state)
 
 
 @opinions_router.callback_query(CallbackMenu.filter(F.button == 'new_event'))
@@ -64,13 +59,26 @@ async def delete_all_questions(callback: CallbackQuery, bot: Bot, state: FSMCont
 async def start_opinions(callback: CallbackQuery, state: FSMContext, bot: Bot):
     questions = await requests.all_questions()
     questions = db_to_dict(questions)
-    await async_pusher.trigger()
+    await async_pusher.reset()
     await state.update_data(**questions)
     await bot.edit_message_text(
         chat_id=callback.from_user.id,
         message_id=callback.message.message_id,
         text='Вопросы',
         reply_markup=ikb_opinions_menu(questions),
+    )
+
+
+@opinions_router.callback_query(CallbackQuestion.filter(F.button == 'question'))
+async def select_question(callback: CallbackQuery, callback_data: CallbackQuestion, state: FSMContext, bot: Bot):
+    data = await state.get_data()
+    question = data[callback_data.id]['question']
+    await async_pusher.set_question(question)
+    await bot.edit_message_text(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        text=question,
+        reply_markup=ikb_question_menu(callback_data.id),
     )
 
 
@@ -113,6 +121,8 @@ async def get_guests_answers_result(callback: CallbackQuery, callback_data: Call
     answers = {str(answer.answer_id): {'answer': answer.answer, 'amount': 0} for answer in question.answers}
     for answer in question.guest_answer:
         answers[str(answer.answer_id)]['amount'] += 1
+    answers = {idx: answer for idx, answer in
+               enumerate(sorted(answers.values(), key=lambda x: x['amount'], reverse=True), 1)}
     await state.update_data(
         {'guests_answers': answers}
     )
@@ -152,6 +162,7 @@ async def show_guests_answers(callback: CallbackQuery, callback_data: CallbackPu
     question = await state.get_value(callback_data.question_id)
     answers = await state.get_value('guests_answers')
     answer = answers.pop(callback_data.answer_id)
+    await async_pusher.set_answer(callback_data.answer_id, f'{answer['amount']}: {answer['answer']}')
     await state.update_data(
         {'guests_answers': answers}
     )
@@ -161,20 +172,4 @@ async def show_guests_answers(callback: CallbackQuery, callback_data: CallbackPu
         message_id=callback.message.message_id,
         text=f'{question['question']}\nПоказать ответы:',
         reply_markup=ikb_guests_answers_admin_menu(callback_data.question_id, answers)
-    )
-
-
-@opinions_router.callback_query(CallbackQuestion.filter(F.button == 'question'))
-async def opinion_answer(callback: CallbackQuery, callback_data: CallbackQuestion, state: FSMContext, bot: Bot):
-    data = await state.get_data()
-    question = data[callback_data.id]['question']
-    pusher_data = data['pusher_data']
-    pusher_data['question'] = question
-    await async_pusher.trigger(pusher_data)
-
-    await bot.edit_message_text(
-        chat_id=callback.from_user.id,
-        message_id=callback.message.message_id,
-        text=question,
-        reply_markup=ikb_question_menu(callback_data.id),
     )

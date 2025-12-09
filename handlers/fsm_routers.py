@@ -16,7 +16,7 @@ from utils.enums import Path
 from utils.enums import Path
 from datetime import datetime
 from database import requests
-from .callback_router import admin_events_menu
+from .inline_routers.menu import admin_events_menu
 
 fsm_router = Router()
 

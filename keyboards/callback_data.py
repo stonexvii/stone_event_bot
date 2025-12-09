@@ -20,7 +20,7 @@ class CallbackGuestAnswer(CallbackData, prefix='CGA'):
 class CallbackPushAnswer(CallbackData, prefix='CPA'):
     button: str
     question_id: str
-    answer_id: str
+    answer_id: int
 
 
 class CallbackMenu(CallbackData, prefix='CM'):
