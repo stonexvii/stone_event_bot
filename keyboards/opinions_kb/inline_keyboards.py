@@ -1,19 +1,22 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from ..buttons import KeyboardButton
-from ..callback_data import CallbackBackButton, CallbackTopGame, CallbackMenu, CallbackQuestion, CallbackGuestAnswer, CallbackPushAnswer
 from database.tables import Question
+from ..buttons import KeyboardButton
+from ..callback_data import CallbackBackButton, CallbackMenu, CallbackQuestion, CallbackGuestAnswer, CallbackPushAnswer, \
+    CallbackEvent
 
 
-def ikb_opinions_menu(question_list: dict):
+def ikb_opinions_menu(question_list: list[Question]):
     keyboard = InlineKeyboardBuilder()
-    for idx, question in question_list.items():
+    if question_list:
+        event_id = question_list[0].event_id
+        for question in question_list:
+            keyboard.button(
+                **KeyboardButton(question.question, CallbackQuestion, button='question', id=question.id).as_kwargs(),
+            )
         keyboard.button(
-            **KeyboardButton(question['question'], CallbackQuestion, button='question', id=idx).as_kwargs(),
+            **KeyboardButton('Удалить всё!', CallbackEvent, button='delete_questions', event_id=event_id).as_kwargs(),
         )
-    keyboard.button(
-        **KeyboardButton('Удалить всё!', CallbackMenu, button='delete_all').as_kwargs(),
-    )
     keyboard.button(
         **KeyboardButton('Назад', CallbackBackButton, button='back').as_kwargs(),
     )
@@ -21,7 +24,7 @@ def ikb_opinions_menu(question_list: dict):
     return keyboard.as_markup()
 
 
-def ikb_question_menu(question_id: str):
+def ikb_question_menu(question_id: int):
     keyboard = InlineKeyboardBuilder()
     buttons = [
         KeyboardButton('Отправить', CallbackQuestion, button='send_question', id=question_id),
@@ -29,7 +32,7 @@ def ikb_question_menu(question_id: str):
         KeyboardButton('Результаты', CallbackQuestion, button='get_result', id=question_id),
         KeyboardButton('Удалить', CallbackQuestion, button='delete_question', id=question_id),
         KeyboardButton('Сбросить', CallbackQuestion, button='reset', id=question_id),
-        KeyboardButton('Назад', CallbackMenu, button='opinions'),
+        KeyboardButton('Назад', CallbackMenu, button='opinions_menu'),
     ]
     for button in buttons:
         keyboard.button(
@@ -40,7 +43,7 @@ def ikb_question_menu(question_id: str):
     return keyboard.as_markup()
 
 
-def ikb_guests_answers_admin_menu(question_id: str, answers_list: dict[int, dict[str, str|int]]):
+def ikb_guests_answers_admin_menu(question_id: int, answers_list: dict[int, dict[str, str | int]]):
     keyboard = InlineKeyboardBuilder()
     for idx, answer in answers_list.items():
         keyboard.button(
@@ -53,22 +56,22 @@ def ikb_guests_answers_admin_menu(question_id: str, answers_list: dict[int, dict
             ).as_kwargs()
         )
     keyboard.button(
-        **KeyboardButton('К вопросам', CallbackMenu, button='opinions').as_kwargs()
+        **KeyboardButton('К вопросам', CallbackMenu, button='opinions_menu').as_kwargs()
     )
     keyboard.adjust(1)
     return keyboard.as_markup()
 
 
-def ikb_guest_answer_menu(user_tg_id: int, question_id: str, answers_list: dict[str, str]):
+def ikb_guest_answer_menu(user_tg_id: int, question: Question):
     keyboard = InlineKeyboardBuilder()
-    for idx, answer in answers_list.items():
+    for answer in question.answers:
         keyboard.button(
             **KeyboardButton(
-                answer,
+                answer.answer,
                 CallbackGuestAnswer,
                 user_tg_id=user_tg_id,
-                question_id=question_id,
-                answer_id=idx,
+                question_id=question.id,
+                answer_id=answer.answer_id,
             ).as_kwargs()
         )
     keyboard.adjust(1)

@@ -1,7 +1,4 @@
-import asyncio
 import aiohttp
-from pathlib import Path
-import os
 
 
 class QRCodeApp:

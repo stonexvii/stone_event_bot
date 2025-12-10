@@ -1,12 +1,11 @@
-from .connection import connection
-
-from aiogram.types import Message
-
-from sqlalchemy import select, insert, update
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
-from ..tables import Base, Answer, Question, User, GuestAnswer, Guest, Event
 from datetime import date
+
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from .connection import connection
+from ..tables import Question, Event
 
 
 @connection
@@ -18,7 +17,9 @@ async def new_event(description: str, event_date: date, session: AsyncSession):
 
 @connection
 async def get_event(event_id: int, session: AsyncSession):
-    event = await session.scalar(select(Event).where(Event.id == event_id))
+    event = await session.scalar(
+        select(Event).options(selectinload(Event.questions).selectinload(Question.answers)).where(
+            Event.id == event_id))
     return event
 
 

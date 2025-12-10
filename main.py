@@ -6,8 +6,8 @@ from aiogram.enums import ParseMode
 
 import config
 import misc
-from handlers import bot_main_router
 from database import create_tables
+from handlers import bot_main_router
 
 
 async def start_bot():

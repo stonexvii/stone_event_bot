@@ -1,6 +1,5 @@
 import json
 import os
-from datetime import date
 
 from utils import FileManager
 from utils.enums import Path

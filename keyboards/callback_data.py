@@ -8,18 +8,18 @@ class CallbackTopGame(CallbackData, prefix='CTG'):
 
 class CallbackQuestion(CallbackData, prefix='CQ'):
     button: str
-    id: str
+    id: int
 
 
 class CallbackGuestAnswer(CallbackData, prefix='CGA'):
     user_tg_id: int
-    question_id: str
-    answer_id: str
+    question_id: int
+    answer_id: int
 
 
 class CallbackPushAnswer(CallbackData, prefix='CPA'):
     button: str
-    question_id: str
+    question_id: int
     answer_id: int
 
 

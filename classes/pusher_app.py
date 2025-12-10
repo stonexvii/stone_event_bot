@@ -1,10 +1,11 @@
-import hmac
 import hashlib
-import time
+import hmac
 import json
+import time
 from urllib.parse import urlencode
 
 import aiohttp
+
 import config
 from .opinions_message import PusherMessage
 
@@ -37,12 +38,6 @@ class AsyncPusher:
     async def reset(self):
         self.message.reset()
         await self.push()
-
-    #
-    # def reset_message(self):
-    #     self.message['question'] = 'HEADER'
-    #     for number in range(1, 5):
-    #         self.message[f'answer_{number}'] = ''
 
     async def push(self, name: str = 'my-event', channel: str = 'my-channel'):
         method, path = "POST", f"/apps/{self.app_id}/events"

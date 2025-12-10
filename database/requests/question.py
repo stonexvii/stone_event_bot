@@ -1,13 +1,9 @@
-from .connection import connection
-
-from aiogram.types import Message
-
-from sqlalchemy import select, insert, update
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from ..tables import Base, Answer, Question, User, GuestAnswer, Guest, Event
-from datetime import date
+from .connection import connection
+from ..tables import Answer, Question
 
 
 @connection
@@ -24,7 +20,7 @@ async def new_question(question: str, answers: list[str], session: AsyncSession)
 @connection
 async def get_question(question_id: int, session: AsyncSession) -> Question:
     question = await session.scalar(
-        select(Question).options(selectinload(Question.answers), selectinload(Question.guest_answer)).where(
+        select(Question).options(selectinload(Question.answers), selectinload(Question.users_answers)).where(
             Question.id == question_id))
     return question
 
@@ -37,8 +33,9 @@ async def get_answer(question_id: int, answer_id: int, session: AsyncSession) ->
 
 
 @connection
-async def all_questions(session: AsyncSession):
-    questions = await session.scalars(select(Question).options(selectinload(Question.answers)))
+async def get_event_questions(event_id: int, session: AsyncSession):
+    questions = await session.scalars(
+        select(Question).options(selectinload(Question.answers)).where(Question.event_id == event_id))
     return questions.all()
 
 
@@ -50,8 +47,8 @@ async def delete_question(question_id: int, session: AsyncSession):
 
 
 @connection
-async def delete_questions(session: AsyncSession):
-    questions = await all_questions()
+async def delete_questions(event_id: int, session: AsyncSession):
+    questions = await get_event_questions(event_id, session)
     for question in questions:
         await session.delete(question)
     await session.commit()

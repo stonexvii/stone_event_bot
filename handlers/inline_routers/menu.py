@@ -1,28 +1,13 @@
-from datetime import date
-from datetime import datetime
-from asyncio import sleep
 from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message, BufferedInputFile
 
-from ai_gpt import GPTMessage
-from ai_gpt.enums import GPTRole
-# from data import get_examples
-# from database import requests
-# from database.tables import User
-from fsm import Generate, Reminder, TopGame, Events
-from keyboards import *
-# from keyboards.callback_data import CallbackBackButton, CallbackMainMenu, CallbackApprove
-# from scheduler.scheduler import schedule_event
-from utils import FileManager
-from utils.enums import Path
-from utils.bot import db_to_dict
-from keyboards.callback_data import CallbackTopGame, CallbackMenu, CallbackBackButton, CallbackQuestion, \
-    CallbackPushAnswer, CallbackEvent
-from middleware import AdminMiddleware
+from classes import qr_code_app, async_pusher
 from database import requests
-from async_apps import qr_code_app, async_pusher
 from fsm import Events
+from keyboards import *
+from keyboards.callback_data import CallbackMenu, CallbackEvent
+from middleware import AdminMiddleware
 
 menu_router = Router()
 menu_router.callback_query.middleware(AdminMiddleware())
@@ -105,7 +90,6 @@ async def set_event_title(callback: CallbackQuery, callback_data: CallbackEvent,
         chat_id=callback.from_user.id,
         message_id=callback.message.message_id,
         text='Введите заголовок для мероприятия:',
-        # reply_markup=ikb_event_menu(event),
     )
 
 

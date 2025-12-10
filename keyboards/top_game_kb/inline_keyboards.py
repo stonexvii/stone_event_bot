@@ -1,8 +1,8 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from ..buttons import KeyboardButton
-from ..callback_data import CallbackBackButton, CallbackTopGame, CallbackMenu, CallbackQuestion, CallbackGuestAnswer, CallbackPushAnswer
-from database.tables import Question
+from ..callback_data import CallbackBackButton, CallbackTopGame
+
 
 def ikb_top_game_answers(dict_message: dict):
     keyboard = InlineKeyboardBuilder()
