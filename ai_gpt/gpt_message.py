@@ -1,5 +1,4 @@
 import json
-import os
 
 from utils import FileManager
 from .enums import GPTRole

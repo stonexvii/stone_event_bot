@@ -47,7 +47,4 @@ class QRCodeApp:
                         f"Ошибка запроса: {resp.status}\nТело ответа: {error_text}"
                     )
                 img_bytes = await resp.read()
-        # img_bytes = await resp.read()
-
         return img_bytes
-        # Path(os.path.join('data', self.filename)).write_bytes(img_bytes)

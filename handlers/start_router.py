@@ -4,12 +4,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 import config
+from classes import current_event
+from data import messages
 from database import requests
 from keyboards import ikb_main_menu
 from middleware import AddAdminArgument
-from classes import current_event
 from utils import FileManager
-from data import messages
 
 start_router = Router()
 start_router.message.middleware(AddAdminArgument())

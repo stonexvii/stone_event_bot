@@ -30,7 +30,7 @@ async def get_text_from_message(message: Message, bot: Bot):
     return data_text
 
 
-def response_to_dict(message_text: str) -> dict[str, str | dict[str, bool|str]]:
+def response_to_dict(message_text: str) -> dict[str, str | dict[str, bool | str]]:
     data = json.loads(message_text)
     for key, value in data.items():
         if key != 'question':

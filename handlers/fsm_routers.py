@@ -5,17 +5,15 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from ai_gpt import ai_client
+from ai_gpt import prompts
 from ai_gpt.enums import GPTRole
 from ai_gpt.gpt_client import GPTMessage
+from classes import async_pusher
 from database import requests
 from fsm import TopGame, Events
 from keyboards import ikb_top_game_answers
 from utils.bot import get_text_from_message, response_to_dict
-from utils.enums import Path
 from .inline_routers.menu import admin_events_menu
-from ai_gpt import prompts
-from classes.messages import PusherMessage
-from classes import async_pusher
 
 fsm_router = Router()
 

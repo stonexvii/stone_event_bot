@@ -53,8 +53,6 @@ class AsyncPusher:
         await self.push()
 
     async def push(self, name: str = 'my-event', channel: str = 'my-channel'):
-        pass
-        # print(self._message.json)
         method, path = "POST", f"/apps/{self.app_id}/events"
         body = json.dumps(
             {
@@ -63,7 +61,6 @@ class AsyncPusher:
                 "data": self._message.json,
             },
         )
-        print(self._message.json)
         params = {
             "auth_key": self.key,
             "auth_timestamp": int(time.time()),

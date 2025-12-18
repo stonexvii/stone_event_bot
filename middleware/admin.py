@@ -8,10 +8,10 @@ import config
 
 class AddAdminArgument(BaseMiddleware):
     async def __call__(
-        self,
-        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-        update: TelegramObject,
-        data: Dict[str, Any]
+            self,
+            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            update: TelegramObject,
+            data: Dict[str, Any]
     ) -> Any:
         data['admin'] = update.from_user.id == config.ADMIN_ID
         result = await handler(update, data)
@@ -20,10 +20,10 @@ class AddAdminArgument(BaseMiddleware):
 
 class AdminMiddleware(BaseMiddleware):
     async def __call__(
-        self,
-        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-        update: TelegramObject,
-        data: Dict[str, Any]
+            self,
+            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            update: TelegramObject,
+            data: Dict[str, Any]
     ) -> Any:
         if update.from_user.id == config.ADMIN_ID:
             result = await handler(update, data)
