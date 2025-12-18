@@ -4,7 +4,9 @@ import os
 class FileManager:
     @staticmethod
     def read_txt(*args, with_kwargs: bool = True, **kwargs) -> str:
-        path = os.path.join(*args) + '.txt'
+        path = os.path.join(*args)
+        if not path.endswith('.txt'):
+            path += '.txt'
         with open(path, 'r', encoding='UTF-8') as file:
             response = file.read()
         if with_kwargs:

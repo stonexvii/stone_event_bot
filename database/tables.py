@@ -29,7 +29,8 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(900), nullable=True)
     username: Mapped[str] = mapped_column(String(100), nullable=True)
     event_id: Mapped[int] = mapped_column(ForeignKey('events.id', ondelete="CASCADE"), nullable=False)
-    is_sending: Mapped[bool] = mapped_column(Boolean, default=False)
+    event_score: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_sending: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     event = relationship('Event', back_populates='users')
     answers = relationship('UserAnswer', back_populates='user', cascade='all, delete-orphan', passive_deletes=True)

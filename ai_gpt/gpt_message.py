@@ -2,14 +2,13 @@ import json
 import os
 
 from utils import FileManager
-from utils.enums import Path
 from .enums import GPTRole
 
 
 class GPTMessage:
 
     def __init__(self, prompt: str, message_list: list[dict[str, str]] | None = None):
-        self._prompt_name = prompt
+        self._prompt_path = prompt
         self.message_list = self._init_message() if message_list is None else message_list
 
     def _init_message(self) -> list[dict[str, str]]:
@@ -20,8 +19,7 @@ class GPTMessage:
         return [message]
 
     def _load_prompt(self) -> str:
-        prompt_path: str = os.path.join(Path.PROMPT.value, self._prompt_name)
-        prompt = FileManager.read_txt(prompt_path, with_kwargs=False)
+        prompt = FileManager.read_txt(self._prompt_path, with_kwargs=False)
         return prompt
 
     def update(self, role: GPTRole, message: str):

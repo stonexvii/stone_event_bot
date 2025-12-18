@@ -48,7 +48,7 @@ def ikb_guests_answers_admin_menu(question_id: int, answers_list: dict[int, dict
     for idx, answer in answers_list.items():
         keyboard.button(
             **KeyboardButton(
-                f'{answer['answer']}: {answer['amount']}',
+                f'{answer['text']}: {answer['amount']}',
                 CallbackPushAnswer,
                 button='push',
                 question_id=question_id,

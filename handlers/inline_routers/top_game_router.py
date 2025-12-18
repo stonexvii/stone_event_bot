@@ -6,6 +6,9 @@ from fsm import TopGame
 from keyboards import *
 from keyboards.callback_data import CallbackTopGame, CallbackMenu
 from middleware import AdminMiddleware
+from classes import async_pusher
+from classes.messages import PusherMessage
+
 
 top_game_router = Router()
 top_game_router.callback_query.middleware(AdminMiddleware())
@@ -14,6 +17,9 @@ top_game_router.callback_query.middleware(AdminMiddleware())
 @top_game_router.callback_query(CallbackMenu.filter(F.button == 'top'))
 async def start_top_game(callback: CallbackQuery, bot: Bot, state: FSMContext):
     await state.set_state(TopGame.wait_for_request)
+    async_pusher.set_message(PusherMessage(5))
+    async_pusher.set_title('ТОП 5 против ИИ')
+    # await async_pusher.push()
     await bot.edit_message_text(
         chat_id=callback.from_user.id,
         message_id=callback.message.message_id,
@@ -30,6 +36,7 @@ async def top_game_answer(callback: CallbackQuery, callback_data: CallbackTopGam
     )
     message_data = await state.get_data()
     message_data[callback_data.button]['visible'] = True
+    await async_pusher.set_top5(**message_data)
     await state.update_data(
         **message_data,
     )

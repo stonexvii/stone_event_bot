@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 import aiohttp
 
 import config
-from .opinions_message import PusherMessage
+from .messages import PusherMessage
 
 
 class AsyncPusher:
@@ -25,28 +25,45 @@ class AsyncPusher:
         self.cluster = config.PUSHER_CLUSTER
         self.scheme = "https" if ssl else "http"
         self.base = f"{self.scheme}://api-{self.cluster}.pusher.com"
-        self.message = PusherMessage()
+        self._message: PusherMessage | None = None
+
+    def set_message(self, message: PusherMessage):
+        self._message = message
+
+    def set_title(self, title: str):
+        self._message.set_title(title)
 
     async def set_question(self, question: str):
-        self.message.set_question(question)
+        self._message.set_question(question)
         await self.push()
 
-    async def set_answer(self, answer_id: int, answer: str):
-        self.message.set_answer(answer_id, answer)
+    async def set_answer(self, answer_id: int, **kwargs):
+        self._message.set_answer(answer_id, **kwargs)
         await self.push()
 
     async def reset(self):
-        self.message.reset()
+        self._message.reset()
+        await self.push()
+
+    async def set_top5(self, **kwargs):
+        self._message.set_question(kwargs['question'])
+        for answer_idx, answer in kwargs.items():
+            if answer_idx != 'question':
+                self._message.set_answer(answer_idx, **answer)
         await self.push()
 
     async def push(self, name: str = 'my-event', channel: str = 'my-channel'):
+        pass
+        # print(self._message.json)
         method, path = "POST", f"/apps/{self.app_id}/events"
-        body = json.dumps({
-            "name": name,
-            "channels": [channel],
-            "data": json.dumps(self.message.json, ensure_ascii=False)
-        })
-
+        body = json.dumps(
+            {
+                "name": name,
+                "channels": [channel],
+                "data": self._message.json,
+            },
+        )
+        print(self._message.json)
         params = {
             "auth_key": self.key,
             "auth_timestamp": int(time.time()),

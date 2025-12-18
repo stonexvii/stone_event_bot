@@ -2,8 +2,8 @@ from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from classes import async_pusher
-from classes import current_event
+from classes import async_pusher, current_event
+from classes.messages import PusherMessage
 from database import requests
 from fsm import Events
 from keyboards import *
@@ -21,7 +21,8 @@ opinions_router.callback_query.middleware(AdminMiddleware())
 async def start_opinions(callback: CallbackQuery, callback_data: CallbackEvent, state: FSMContext, bot: Bot):
     if isinstance(callback_data, CallbackEvent):
         await current_event.activate(callback_data.event_id)
-        async_pusher.message.set_title(current_event.title)
+        async_pusher.set_message(PusherMessage(4))
+        async_pusher.set_title(current_event.title)
     if not current_event.id:
         events = await requests.get_events()
         msg_text = 'Выберите мероприятие:'
@@ -46,11 +47,12 @@ async def back_to_main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext
 @opinions_router.callback_query(CallbackQuestion.filter(F.button == 'question'))
 async def select_question(callback: CallbackQuery, callback_data: CallbackQuestion, bot: Bot):
     question = current_event.get_question(callback_data.id)
+    # async_pusher.set_message(PusherMessageOpinions())
     await async_pusher.set_question(question.question)
     await bot.edit_message_text(
         chat_id=callback.from_user.id,
         message_id=callback.message.message_id,
-        text=question.question,
+        text=question.question + '\n\n' + '\n'.join([f' - {answer.answer}' for answer in question.answers]),
         reply_markup=ikb_question_menu(question.id),
     )
 
@@ -112,7 +114,7 @@ async def get_answers_amount(callback: CallbackQuery, callback_data: CallbackQue
 async def get_users_answers_result(callback: CallbackQuery, callback_data: CallbackQuestion, bot: Bot,
                                    state: FSMContext):
     question = await requests.get_question(callback_data.id)
-    answers = {str(answer.answer_id): {'answer': answer.answer, 'amount': 0} for answer in question.answers}
+    answers = {str(answer.answer_id): {'text': answer.answer, 'amount': 0} for answer in question.answers}
     for answer in question.users_answers:
         answers[str(answer.answer_id)]['amount'] += 1
     answers = {idx: answer for idx, answer in
@@ -154,7 +156,8 @@ async def show_guests_answers(callback: CallbackQuery, callback_data: CallbackPu
     question = current_event.get_question(callback_data.question_id)
     answers = await state.get_value('users_answers')
     answer = answers.pop(callback_data.answer_id)
-    await async_pusher.set_answer(callback_data.answer_id, f'{answer['amount']}: {answer['answer']}')
+    await async_pusher.set_answer(callback_data.answer_id, **answer)
+    print(answer)
     await state.update_data(
         {'users_answers': answers}
     )

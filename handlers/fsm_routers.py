@@ -13,6 +13,9 @@ from keyboards import ikb_top_game_answers
 from utils.bot import get_text_from_message, response_to_dict
 from utils.enums import Path
 from .inline_routers.menu import admin_events_menu
+from ai_gpt import prompts
+from classes.messages import PusherMessage
+from classes import async_pusher
 
 fsm_router = Router()
 
@@ -33,13 +36,11 @@ async def catch_new_event(message: Message, bot: Bot, state: FSMContext):
 async def catch_voice_message(message: Message, bot: Bot, state: FSMContext):
     msg_text = await get_text_from_message(message, bot)
     if msg_text:
-        msg_list = GPTMessage(Path.MAIN_PROMPT.value)
+        msg_list = GPTMessage(prompts.TOP_GAME)
         msg_list.update(GPTRole.USER, msg_text)
         response = await ai_client.request(msg_list, bot)
-        await message.answer(
-            text=response,
-        )
         message_data = response_to_dict(response)
+        await async_pusher.set_top5(**message_data)
         await state.update_data(
             **message_data,
         )
