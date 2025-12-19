@@ -28,7 +28,7 @@ async def start_opinions(callback: CallbackQuery, callback_data: CallbackEvent, 
         msg_text = 'Выберите мероприятие:'
         keyboard = ikb_select_event(events)
     else:
-        await async_pusher.reset()
+        await async_pusher.set_message(PusherMessage(4))
         msg_text = 'Выбери вопрос:'
         keyboard = ikb_opinions_menu(current_event.questions)
     await bot.edit_message_text(
