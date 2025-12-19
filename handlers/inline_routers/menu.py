@@ -1,13 +1,15 @@
 from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, BufferedInputFile
+from aiogram.types import CallbackQuery, Message
 
-from classes import qr_code_app, async_pusher
+from classes import async_pusher
+from classes.messages import PusherMessage
 from database import requests
 from fsm import Events
 from keyboards import *
 from keyboards.callback_data import CallbackMenu, CallbackEvent
 from middleware import AdminMiddleware
+from classes import current_event
 
 menu_router = Router()
 menu_router.callback_query.middleware(AdminMiddleware())
@@ -60,21 +62,23 @@ async def select_event(callback: CallbackQuery, callback_data: CallbackEvent, bo
 
 @menu_router.callback_query(CallbackEvent.filter(F.button == 'activate'))
 async def activate_event(callback: CallbackQuery, callback_data: CallbackEvent, bot: Bot):
+    # await requests.activate_event(callback_data.event_id)
     await requests.activate_event(callback_data.event_id)
-    event = await requests.get_event(callback_data.event_id)
+    await current_event.activate()
     await callback.answer(
-        text=f'Активное событие:\n{event.title}',
+        text=f'Активное событие:\n{current_event.title}',
         show_alert=True,
     )
-    img_bytes = await qr_code_app.get_qr(event.id)
-    async_pusher.message.set_title(event.title)
-    photo = BufferedInputFile(img_bytes, filename="qr.png")
+    async_pusher.set_message(PusherMessage(4))
+    async_pusher.set_title(current_event.title)
 
-    await bot.send_photo(
-        chat_id=callback.from_user.id,
-        photo=photo,
-        caption=f"Вот твой QR 👇",
-    )
+    # img_bytes = await qr_code_app.get_qr(event.id)
+    # photo = BufferedInputFile(img_bytes, filename="qr.png")
+    # await bot.send_photo(
+    #     chat_id=callback.from_user.id,
+    #     photo=photo,
+    #     caption=f"Вот твой QR 👇",
+    # )
 
 
 @menu_router.callback_query(CallbackEvent.filter(F.button == 'title'))

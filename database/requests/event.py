@@ -24,6 +24,14 @@ async def get_event(event_id: int, session: AsyncSession):
 
 
 @connection
+async def get_active_event(session: AsyncSession):
+    event = await session.scalar(
+        select(Event).options(selectinload(Event.questions).selectinload(Question.answers)).where(
+            Event.active.is_(True)))
+    return event
+
+
+@connection
 async def get_events(session: AsyncSession):
     events = await session.scalars(select(Event).where(Event.is_done.is_(False)))
     return events.all()

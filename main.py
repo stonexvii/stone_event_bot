@@ -6,12 +6,14 @@ from aiogram.enums import ParseMode
 
 import config
 import misc
+from classes import current_event
 from database import create_tables
 from handlers import bot_main_router
 
 
 async def start_bot():
     await create_tables()
+    await current_event.activate()
     bot = Bot(
         token=config.BOT_TOKEN,
         default=DefaultBotProperties(

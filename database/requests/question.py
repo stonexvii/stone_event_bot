@@ -7,8 +7,8 @@ from ..tables import Answer, Question
 
 
 @connection
-async def new_question(question: str, answers: list[str], session: AsyncSession):
-    question = Question(question=question)
+async def new_question(event_id: int, question: str, answers: list[str], session: AsyncSession):
+    question = Question(event_id=event_id, question=question)
     session.add(question)
     await session.commit()
     await session.refresh(question)

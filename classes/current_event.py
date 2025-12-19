@@ -14,8 +14,8 @@ class CurrentEvent:
         self.title = None
         self.questions = None
 
-    async def activate(self, event_id: int):
-        event = await requests.get_event(event_id)
+    async def activate(self):
+        event = await requests.get_active_event()
         self.id = event.id
         self.title = event.title
         self.questions = event.questions

@@ -18,9 +18,9 @@ opinions_router.callback_query.middleware(AdminMiddleware())
 
 @opinions_router.callback_query(CallbackEvent.filter(F.button == 'target_event'))
 @opinions_router.callback_query(CallbackMenu.filter(F.button == 'opinions_menu'))
-async def start_opinions(callback: CallbackQuery, callback_data: CallbackEvent, state: FSMContext, bot: Bot):
+async def start_opinions(callback: CallbackQuery, callback_data: CallbackEvent, bot: Bot):
     if isinstance(callback_data, CallbackEvent):
-        await current_event.activate(callback_data.event_id)
+        await current_event.activate()
         async_pusher.set_message(PusherMessage(4))
         async_pusher.set_title(current_event.title)
     if not current_event.id:

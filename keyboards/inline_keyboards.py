@@ -45,10 +45,10 @@ def ikb_events_menu(events_list: list[Event]):
         KeyboardButton('Создать', CallbackMenu, button='new_event'),
         KeyboardButton('Назад', CallbackBackButton, button='back')
     ]
-    for event in events_list:
+    for event in sorted(events_list, key=lambda item: item.date):
         keyboard.button(
             **KeyboardButton(
-                f'{event.date} {event.title}' + ('✔️' if event.active else ''),
+                f'{event.date} {event.title}' + (' ✅' if event.active else ''),
                 CallbackEvent,
                 button='select',
                 event_id=event.id,
