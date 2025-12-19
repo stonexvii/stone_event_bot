@@ -47,7 +47,6 @@ async def back_to_main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext
 @opinions_router.callback_query(CallbackQuestion.filter(F.button == 'question'))
 async def select_question(callback: CallbackQuery, callback_data: CallbackQuestion, bot: Bot):
     question = current_event.get_question(callback_data.id)
-    # async_pusher.set_message(PusherMessageOpinions())
     await async_pusher.set_question(question.question)
     await bot.edit_message_text(
         chat_id=callback.from_user.id,
