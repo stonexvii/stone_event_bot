@@ -45,9 +45,9 @@ async def command_start(message: Message, command: CommandObject, admin: bool, b
             if current_event.id:
                 await requests.new_user(message.from_user.id, message.from_user.username, current_event.id)
                 await message.answer(
-                    text='Ты пользователь',
+                    text=FileManager.read_txt(messages.USER_WELCOME),
                 )
-            await bot.send_message(
-                chat_id=config.ADMIN_ID,
-                text='Мероприятие не установлено!'
-            )
+            # await bot.send_message(
+            #     chat_id=config.ADMIN_ID,
+            #     text='Мероприятие не установлено!'
+            # )
