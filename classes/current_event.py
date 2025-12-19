@@ -16,9 +16,10 @@ class CurrentEvent:
 
     async def activate(self):
         event = await requests.get_active_event()
-        self.id = event.id
-        self.title = event.title
-        self.questions = event.questions
+        if event:
+            self.id = event.id
+            self.title = event.title
+            self.questions = event.questions
 
     def get_question(self, question_id: int):
         return [question for question in self.questions if question.id == question_id][0]
