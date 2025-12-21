@@ -8,6 +8,8 @@ from fsm import TopGame
 from keyboards import *
 from keyboards.callback_data import CallbackTopGame, CallbackMenu
 from middleware import AdminMiddleware
+from utils import FileManager
+from data import messages
 
 top_game_router = Router()
 top_game_router.callback_query.middleware(AdminMiddleware())
@@ -21,7 +23,7 @@ async def start_top_game(callback: CallbackQuery, bot: Bot, state: FSMContext):
     await bot.edit_message_text(
         chat_id=callback.from_user.id,
         message_id=callback.message.message_id,
-        text='Задавай тему для игры',
+        text=FileManager.read_txt(messages.TOP_5_EXAMPLES),
         reply_markup=ikb_back_button(),
 
     )
