@@ -113,7 +113,7 @@ async def get_answers_amount(callback: CallbackQuery, callback_data: CallbackQue
 async def get_users_answers_result(callback: CallbackQuery, callback_data: CallbackQuestion, bot: Bot,
                                    state: FSMContext):
     question = await requests.get_question(callback_data.id)
-    answers = {str(answer.answer_id): {'text': answer.answer, 'amount': 0} for answer in question.answers}
+    answers = {str(answer.id): {'text': answer.answer, 'amount': 0} for answer in question.answers}
     for answer in question.users_answers:
         answers[str(answer.answer_id)]['amount'] += 1
     answers = {idx: answer for idx, answer in
@@ -147,7 +147,7 @@ async def delete_question(callback: CallbackQuery, callback_data: CallbackQuesti
         text=f'Вопрос:\n{question}\nУдален!',
         show_alert=True,
     )
-    await start_opinions(callback, state, bot)
+    await start_opinions(callback, bot)
 
 
 @opinions_router.callback_query(CallbackPushAnswer.filter(F.button == 'push'))
@@ -156,7 +156,6 @@ async def show_guests_answers(callback: CallbackQuery, callback_data: CallbackPu
     answers = await state.get_value('users_answers')
     answer = answers.pop(callback_data.answer_id)
     await async_pusher.set_answer(callback_data.answer_id, **answer)
-    print(answer)
     await state.update_data(
         {'users_answers': answers}
     )

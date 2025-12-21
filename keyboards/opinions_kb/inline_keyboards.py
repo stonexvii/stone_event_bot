@@ -62,6 +62,18 @@ def ikb_guests_answers_admin_menu(question_id: int, answers_list: dict[int, dict
     return keyboard.as_markup()
 
 
+def ikb_guest_start_menu(user_tg_id: int):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(
+        **KeyboardButton(
+            'Начать!',
+            CallbackGuestAnswer,
+            user_tg_id=user_tg_id,
+        ).as_kwargs()
+    )
+    return keyboard.as_markup()
+
+
 def ikb_guest_answer_menu(user_tg_id: int, question: Question):
     keyboard = InlineKeyboardBuilder()
     for answer in question.answers:
@@ -71,7 +83,8 @@ def ikb_guest_answer_menu(user_tg_id: int, question: Question):
                 CallbackGuestAnswer,
                 user_tg_id=user_tg_id,
                 question_id=question.id,
-                answer_id=answer.answer_id,
+                answer_id=answer.id,
+                answer_list_id=answer.answer_id,
             ).as_kwargs()
         )
     keyboard.adjust(1)

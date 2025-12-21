@@ -7,7 +7,8 @@ import config
 from classes import current_event
 from data import messages
 from database import requests
-from keyboards import ikb_main_menu
+from fsm import QuestionForUser
+from keyboards import ikb_main_menu, ikb_guest_start_menu
 from middleware import AddAdminArgument
 from utils import FileManager
 
@@ -36,6 +37,7 @@ async def command_start(message: Message, command: CommandObject, admin: bool, b
                 await message.answer(
                     text=FileManager.read_txt(messages.USER_WELCOME),
                 )
+
             else:
                 await bot.send_message(
                     chat_id=config.ADMIN_ID,
@@ -43,11 +45,9 @@ async def command_start(message: Message, command: CommandObject, admin: bool, b
                 )
         else:
             if current_event.id:
+                await state.set_state(QuestionForUser.question_for_user)
                 await requests.new_user(message.from_user.id, message.from_user.username, current_event.id)
                 await message.answer(
                     text=FileManager.read_txt(messages.USER_WELCOME),
+                    reply_markup=ikb_guest_start_menu(message.from_user.id),
                 )
-            # await bot.send_message(
-            #     chat_id=config.ADMIN_ID,
-            #     text='Мероприятие не установлено!'
-            # )

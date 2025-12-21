@@ -13,8 +13,9 @@ class CallbackQuestion(CallbackData, prefix='CQ'):
 
 class CallbackGuestAnswer(CallbackData, prefix='CGA'):
     user_tg_id: int
-    question_id: int
-    answer_id: int
+    question_id: int = 0
+    answer_id: int = 0
+    answer_list_id: int = 0
 
 
 class CallbackPushAnswer(CallbackData, prefix='CPA'):

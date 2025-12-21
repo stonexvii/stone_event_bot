@@ -15,9 +15,6 @@ class UserName(StatesGroup):
     wait_for_answer = State()
 
 
-class Generate(StatesGroup):
-    wait_for_answer = State()
-
-
-class Reminder(StatesGroup):
-    wait_for_answer = State()
+class QuestionForUser(StatesGroup):
+    question_for_user = State()
+    wait_user_answer = State()
