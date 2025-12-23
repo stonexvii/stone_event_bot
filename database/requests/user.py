@@ -8,12 +8,12 @@ from ..tables import User, UserAnswer
 @connection
 async def new_user(tg_user_id: int, tg_username: str, event_id: int, session: AsyncSession):
     user = await session.scalar(select(User).where(User.id == tg_user_id))
-    if not user:
-        user = User(id=tg_user_id, username=tg_username, event_id=event_id)
-        session.add(user)
-        await session.commit()
-        await session.refresh(user)
-    return user
+    if user:
+        return True
+    user = User(id=tg_user_id, username=tg_username, event_id=event_id)
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
 
 
 @connection

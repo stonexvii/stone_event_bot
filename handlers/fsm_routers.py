@@ -31,27 +31,27 @@ async def disable_user(message: Message, state: FSMContext, bot: Bot):
     )
 
 
-@fsm_router.callback_query(QuestionForUser.question_for_user, CallbackGuestAnswer.filter())
-async def next_user_question(callback: CallbackQuery, callback_data: CallbackGuestAnswer, state: FSMContext, bot: Bot):
-    data = await state.get_data()
-    if data:
-        question_id = data['question_id']
-    else:
-        question_id = callback_data.question_id
-    await state.update_data({'question_id': question_id + 1})
-    if question_id < len(current_event.questions):
-        await state.set_state(QuestionForUser.wait_user_answer)
-        msg_text = f'Вопрос {question_id + 1} из {len(current_event.questions)}\n\n{current_event.questions[question_id].question}'
-        keyboard = ikb_guest_answer_menu(callback_data.user_tg_id, current_event.questions[question_id])
-    else:
-        msg_text = FileManager.read_txt(messages.USER_FINAL)
-        keyboard = None
-    await bot.edit_message_text(
-        chat_id=callback.from_user.id,
-        message_id=callback.message.message_id,
-        text=msg_text,
-        reply_markup=keyboard,
-    )
+# @fsm_router.callback_query(CallbackGuestAnswer.filter())
+# async def next_user_question(callback: CallbackQuery, callback_data: CallbackGuestAnswer, state: FSMContext, bot: Bot):
+#     data = await state.get_data()
+#     if data:
+#         question_id = data['question_id']
+#     else:
+#         question_id = callback_data.question_id
+#     await state.update_data({'question_id': question_id + 1})
+#     if question_id < len(current_event.questions):
+#         await state.set_state(QuestionForUser.wait_user_answer)
+#         msg_text = f'Вопрос {question_id + 1} из {len(current_event.questions)}\n\n{current_event.questions[question_id].question}'
+#         keyboard = ikb_guest_answer_menu(callback_data.user_tg_id, current_event.questions[question_id])
+#     else:
+#         msg_text = FileManager.read_txt(messages.USER_FINAL)
+#         keyboard = None
+#     await bot.edit_message_text(
+#         chat_id=callback.from_user.id,
+#         message_id=callback.message.message_id,
+#         text=msg_text,
+#         reply_markup=keyboard,
+#     )
 
 
 @fsm_router.message(Events.new_event)

@@ -45,9 +45,10 @@ async def command_start(message: Message, command: CommandObject, admin: bool, b
                 )
         else:
             if current_event.id:
-                await state.set_state(QuestionForUser.question_for_user)
-                await requests.new_user(message.from_user.id, message.from_user.username, current_event.id)
-                await message.answer(
-                    text=FileManager.read_txt(messages.USER_WELCOME),
-                    reply_markup=ikb_guest_start_menu(message.from_user.id),
-                )
+                # await state.set_state(QuestionForUser.question_for_user)
+                user = await requests.new_user(message.from_user.id, message.from_user.username, current_event.id)
+                if not user:
+                    await message.answer(
+                        text=FileManager.read_txt(messages.USER_WELCOME),
+                        # reply_markup=ikb_guest_start_menu(message.from_user.id),
+                    )
