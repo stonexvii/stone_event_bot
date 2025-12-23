@@ -4,6 +4,7 @@ from aiogram import Router, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+import config
 from ai_gpt import ai_client
 from ai_gpt import prompts
 from ai_gpt.enums import GPTRole
@@ -12,7 +13,7 @@ from classes import async_pusher
 from classes import current_event
 from data import messages
 from database import requests
-from fsm import TopGame, Events, QuestionForUser
+from fsm import TopGame, Events, QuestionForUser, UserSending
 from keyboards import ikb_top_game_answers, ikb_guest_answer_menu
 from keyboards.callback_data import CallbackGuestAnswer
 from utils import FileManager
@@ -63,6 +64,26 @@ async def catch_new_event(message: Message, bot: Bot, state: FSMContext):
         message_id=message.message_id,
     )
     await admin_events_menu(message, bot, state)
+
+
+@fsm_router.message(UserSending.wait_for_message)
+async def user_sending(message: Message, state: FSMContext, bot: Bot):
+    event_id = await state.get_value('event_id')
+    users = await requests.get_event_users(event_id)
+    successful = 0
+    for user in users:
+        try:
+            await message.copy_to(
+                chat_id=user.id,
+            )
+            await requests.set_user_sending(user.id)
+            successful += 1
+        except Exception:
+            pass
+    await state.clear()
+    await message.answer(
+        text=f'Отправлено {successful}/{len(users)} сообщений!'
+    )
 
 
 @fsm_router.message(TopGame.wait_for_request)

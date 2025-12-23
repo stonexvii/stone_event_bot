@@ -18,3 +18,7 @@ class UserName(StatesGroup):
 class QuestionForUser(StatesGroup):
     question_for_user = State()
     wait_user_answer = State()
+
+
+class UserSending(StatesGroup):
+    wait_for_message = State()

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .connection import connection
@@ -42,6 +42,12 @@ async def add_user_answer(tg_user_id: int, question_id: int, answer_id: int, ses
 async def get_users_answers(question_id: int, session: AsyncSession):
     guests_answers = await session.scalars(select(UserAnswer).where(UserAnswer.question_id == question_id))
     return guests_answers.all()
+
+
+@connection
+async def set_user_sending(user_tg_id: int, session: AsyncSession):
+    await session.execute(update(User).where(User.id == user_tg_id).values(is_sending=True))
+    await session.commit()
 
 
 @connection
