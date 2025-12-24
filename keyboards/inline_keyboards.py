@@ -86,3 +86,9 @@ def ikb_back_button():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(**KeyboardButton('Назад', CallbackBackButton, button='to_main').as_kwargs())
     return keyboard.as_markup()
+
+
+def ikb_make_toast():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(**KeyboardButton('ТОСТ! 🎉', CallbackMenu, button='make_toast').as_kwargs())
+    return keyboard.as_markup()

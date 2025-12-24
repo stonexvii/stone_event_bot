@@ -11,8 +11,15 @@ from keyboards.callback_data import CallbackMenu, CallbackEvent
 from middleware import AdminMiddleware
 from classes import current_event
 
+from ai_gpt import ai_client
+from ai_gpt.gpt_message import GPTMessage
+from ai_gpt.prompts import SIMPLE_TOAST
+
 menu_router = Router()
 menu_router.callback_query.middleware(AdminMiddleware())
+
+
+
 
 
 async def main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext):

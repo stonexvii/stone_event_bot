@@ -8,18 +8,19 @@ from ai_gpt import ai_client
 from utils.enums import Path
 
 
-async def voice_to_text(message: Message, bot: Bot):
-    try:
-        voice = await bot.get_file(message.voice.file_id)
-        file_path = voice.file_path
-        voice_ogg = os.path.join(Path.VOICE.value, f'voice_{message.from_user.id}.ogg')
-        await bot.download_file(file_path, destination=voice_ogg)
-        response_text = await ai_client.transcript_voice(voice_ogg, bot)
-        os.remove(voice_ogg)
-        return response_text
-    except Exception as e:
-        await message.answer(f"⚠️ Ошибка при обработке аудио: {e}")
-        return None
+async def voice_to_text(message: Message, bot: Bot) -> str:
+    if message.voice:
+        try:
+            voice = await bot.get_file(message.voice.file_id)
+            file_path = voice.file_path
+            voice_ogg = os.path.join(Path.VOICE.value, f'voice_{message.from_user.id}.ogg')
+            await bot.download_file(file_path, destination=voice_ogg)
+            response_text = await ai_client.transcript_voice(voice_ogg, bot)
+            os.remove(voice_ogg)
+            return response_text
+        except Exception as e:
+            return f"⚠️ Ошибка при обработке аудио: {e}"
+    return message.text
 
 
 async def get_text_from_message(message: Message, bot: Bot):
