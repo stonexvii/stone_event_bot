@@ -11,10 +11,11 @@ def ikb_main_menu():
         KeyboardButton('Ваше мнение', CallbackMenu, button='opinions_menu'),
         KeyboardButton('ТОП-5', CallbackMenu, button='top'),
         KeyboardButton('Мероприятия', CallbackMenu, button='events'),
+        KeyboardButton('Пользователи', CallbackMenu, button='users_amount'),
     ]
     for button in buttons:
         keyboard.button(**button.as_kwargs())
-    keyboard.adjust(2, 1)
+    keyboard.adjust(2, 1, 1)
     return keyboard.as_markup()
 
 

@@ -1,5 +1,5 @@
-from aiogram import Router, F
-from aiogram.types import Message
+from aiogram import Router, F, Bot
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from database import requests
@@ -7,6 +7,8 @@ from middleware import AdminMiddleware
 from utils.filemanager import question_from_text
 from classes import current_event
 from fsm import UserSending
+
+from keyboards.callback_data import CallbackMenu
 
 admin_router = Router()
 admin_router.message.middleware(AdminMiddleware())
@@ -34,6 +36,14 @@ async def send_for_users(message: Message, command: CommandObject, state: FSMCon
             text='Пришли сообщение, которое мы отправим людям'
         )
 
+
+@admin_router.callback_query(CallbackMenu.filter(F.button == 'users_amount'))
+async def users_amount(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    users = await requests.get_event_users(current_event.id)
+    await callback.answer(
+        text=f'{len(users)} активных пользователей на этом мероприятии',
+        show_alert=True,
+    )
     # text_file = await message.bot.download(message.document.file_id)
     # text = text_file.read().decode("utf-8")
     # questions = question_from_text(text)
