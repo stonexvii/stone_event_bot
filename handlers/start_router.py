@@ -49,6 +49,6 @@ async def command_start(message: Message, command: CommandObject, admin: bool, b
                 user = await requests.new_user(message.from_user.id, message.from_user.username, current_event.id)
                 await message.answer(
                     text=FileManager.read_txt(messages.USER_WELCOME),
-                    reply_markup=ikb_make_toast(),
+                    # reply_markup=ikb_make_toast(),
                     # reply_markup=ikb_guest_start_menu(message.from_user.id),
                 )
