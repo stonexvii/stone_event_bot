@@ -22,7 +22,6 @@ user_router = Router()
 async def catch_guest_answer(callback: CallbackQuery, callback_data: CallbackGuestAnswer, state: FSMContext, bot: Bot):
     await requests.add_user_answer(callback.from_user.id, callback_data.question_id, callback_data.answer_id)
     question = current_event.get_question(callback_data.question_id)
-    print('CATCH!')
     # await callback.answer(
     #     text=f'Спасибо!\nВопрос: {question.question}\nВаш ответ: {question.answers[callback_data.answer_list_id - 1].answer} - принят!',
     #     show_alert=True,
