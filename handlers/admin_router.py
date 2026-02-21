@@ -26,6 +26,12 @@ async def catch_document(message: Message):
     )
 
 
+@admin_router.message(Command('new'))
+async def new_question(message: Message, command: CommandObject):
+    question, *answers = command.args.split('\n')
+    await requests.new_question(current_event.id, question, answers)
+
+
 @admin_router.message(Command('send'))
 async def send_for_users(message: Message, command: CommandObject, state: FSMContext):
     if command.args.isdigit():
