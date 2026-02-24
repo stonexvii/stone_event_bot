@@ -7,8 +7,7 @@ import config
 from classes import current_event
 from data import messages
 from database import requests
-from fsm import QuestionForUser
-from keyboards import ikb_main_menu, ikb_guest_start_menu, ikb_make_toast
+from keyboards import ikb_main_menu
 from middleware import AddAdminArgument
 from utils import FileManager
 
@@ -45,10 +44,7 @@ async def command_start(message: Message, command: CommandObject, admin: bool, b
                 )
         else:
             if current_event.id:
-                # await state.set_state(QuestionForUser.question_for_user)
-                user = await requests.new_user(message.from_user.id, message.from_user.username, current_event.id)
+                await requests.new_user(message.from_user.id, message.from_user.username, current_event.id)
                 await message.answer(
                     text=FileManager.read_txt(messages.USER_WELCOME),
-                    # reply_markup=ikb_make_toast(),
-                    # reply_markup=ikb_guest_start_menu(message.from_user.id),
                 )

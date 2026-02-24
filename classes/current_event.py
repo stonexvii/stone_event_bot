@@ -13,6 +13,7 @@ class CurrentEvent:
         self.id = None
         self.title = None
         self.questions = None
+        self.catch_answers = True
 
     async def activate(self):
         event = await requests.get_active_event()

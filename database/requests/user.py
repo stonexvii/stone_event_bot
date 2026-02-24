@@ -9,16 +9,22 @@ from ..tables import User, UserAnswer
 async def new_user(tg_user_id: int, tg_username: str, event_id: int, session: AsyncSession):
     user = await session.scalar(select(User).where(User.id == tg_user_id))
     if user:
-        return True
-    user = User(id=tg_user_id, username=tg_username, event_id=event_id)
-    session.add(user)
+        await session.execute(update(User).where(User.id == tg_user_id).values(event_id=event_id))
+    else:
+        user = User(id=tg_user_id, username=tg_username, event_id=event_id)
+        session.add(user)
     await session.commit()
-    await session.refresh(user)
 
 
 @connection
 async def get_event_users(event_id: int, session: AsyncSession):
     response = await session.scalars(select(User).where(User.event_id == event_id))
+    return response.all()
+
+
+@connection
+async def get_all_users(session: AsyncSession):
+    response = await session.scalars(select(User))
     return response.all()
 
 

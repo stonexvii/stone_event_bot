@@ -3,23 +3,16 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from classes import async_pusher
+from classes import current_event
 from classes.messages import PusherMessage
 from database import requests
 from fsm import Events
 from keyboards import *
 from keyboards.callback_data import CallbackMenu, CallbackEvent
 from middleware import AdminMiddleware
-from classes import current_event
-
-from ai_gpt import ai_client
-from ai_gpt.gpt_message import GPTMessage
-from ai_gpt.prompts import SIMPLE_TOAST
 
 menu_router = Router()
 menu_router.callback_query.middleware(AdminMiddleware())
-
-
-
 
 
 async def main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext):
@@ -69,7 +62,6 @@ async def select_event(callback: CallbackQuery, callback_data: CallbackEvent, bo
 
 @menu_router.callback_query(CallbackEvent.filter(F.button == 'activate'))
 async def activate_event(callback: CallbackQuery, callback_data: CallbackEvent, bot: Bot):
-    # await requests.activate_event(callback_data.event_id)
     await requests.activate_event(callback_data.event_id)
     await current_event.activate()
     await callback.answer(
@@ -78,14 +70,6 @@ async def activate_event(callback: CallbackQuery, callback_data: CallbackEvent, 
     )
     async_pusher.set_message(PusherMessage(4))
     async_pusher.set_title(current_event.title)
-
-    # img_bytes = await qr_code_app.get_qr(event.id)
-    # photo = BufferedInputFile(img_bytes, filename="qr.png")
-    # await bot.send_photo(
-    #     chat_id=callback.from_user.id,
-    #     photo=photo,
-    #     caption=f"Вот твой QR 👇",
-    # )
 
 
 @menu_router.callback_query(CallbackEvent.filter(F.button == 'title'))

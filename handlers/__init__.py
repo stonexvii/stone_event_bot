@@ -9,17 +9,9 @@ from .user_router import user_router
 bot_main_router = Router()
 
 bot_main_router.include_routers(
-fsm_router,
-admin_router,
-start_router,
-user_router,
-
-
-
-
-
+    fsm_router,
+    admin_router,
+    start_router,
+    user_router,
     inline_router,
-
-
-
 )
