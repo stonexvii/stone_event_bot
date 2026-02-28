@@ -2,6 +2,8 @@ from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+import random
+import config
 from classes import async_pusher
 from classes import current_event
 from classes.messages import PusherMessage
@@ -46,6 +48,23 @@ async def admin_events_menu(update: Message | CallbackQuery, bot: Bot, state: FS
 async def admin_events(callback: CallbackQuery, bot: Bot, state: FSMContext):
     await state.clear()
     await admin_events_menu(callback, bot, state)
+
+
+@menu_router.callback_query(CallbackMenu.filter(F.button == 'random'))
+async def random_guest(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    users = await requests.get_event_users(current_event.id)
+    lucky_user = random.choice(users)
+    try:
+        await bot.send_message(
+            chat_id=lucky_user.id,
+            text='Ты выиграл!'
+        )
+    except Exception:
+        pass
+    await callback.answer(
+        text=f'Выиграл пользователь {lucky_user.name} ({lucky_user.id})',
+        show_alert=True,
+    )
 
 
 @menu_router.callback_query(CallbackEvent.filter(F.button == 'select'))

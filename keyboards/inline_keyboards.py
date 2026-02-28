@@ -11,6 +11,7 @@ def ikb_main_menu():
         KeyboardButton('Ваше мнение', CallbackMenu, button='opinions_menu'),
         KeyboardButton('ТОП-5', CallbackMenu, button='top'),
         KeyboardButton('Мероприятия', CallbackMenu, button='events'),
+        KeyboardButton('Случайный гость', CallbackMenu, button='random'),
         KeyboardButton('Пользователи', CallbackMenu, button='users_amount'),
     ]
     for button in buttons:
